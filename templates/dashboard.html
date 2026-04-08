@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML Analytics Dashboard | Alzheimer's Predictor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="ambient-background"></div>
+
+    <nav class="dashboard-nav">
+        <div class="nav-brand">
+            <span class="brain-icon">🧠</span> Alzheimer's Predictor
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('home') }}" class="btn secondary-btn nav-btn" style="text-decoration: none;">← Back to Prediction</a>
+        </div>
+    </nav>
+
+    <main class="dashboard-container">
+        <header class="dashboard-header text-center glow-effect">
+            <h1>Model Analytics Dashboard</h1>
+            <p class="subtitle">Comprehensive performance evaluation of machine learning models for Alzheimer's early detection.</p>
+        </header>
+
+        <!-- Summary Highlight -->
+        <section class="card glass summary-card glow-effect">
+            <div class="summary-content">
+                <h2>🏆 Best Performing Model</h2>
+                <p id="best-model-summary" class="highlight-text">Loading analysis...</p>
+            </div>
+        </section>
+
+        <!-- Grid Layout for Charts -->
+        <div class="charts-grid">
+            <!-- Model Comparison -->
+            <section class="card glass chart-card glow-effect">
+                <h3>Model Comparison Metrics</h3>
+                <div class="chart-container">
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Feature Importance -->
+            <section class="card glass chart-card glow-effect">
+                <h3>Feature Importance (Random Forest)</h3>
+                <div class="chart-container">
+                    <canvas id="featureChart"></canvas>
+                </div>
+            </section>
+            
+            <!-- ROC Curve -->
+            <section class="card glass chart-card glow-effect span-2">
+                <h3>ROC Curve Analysis</h3>
+                <div class="chart-container roc-container">
+                    <canvas id="rocChart"></canvas>
+                </div>
+            </section>
+        </div>
+
+        <!-- Confusion Matrices Grid -->
+        <section class="matrices-section text-center">
+            <h2 class="glow-text">Confusion Matrices</h2>
+            <div class="matrix-grid" id="matrixContainer">
+                <!-- Dynamically populated via JS -->
+            </div>
+        </section>
+        
+        <!-- Loading overlay -->
+        <div id="dashboard-loading" class="overlay active">
+            <div class="spinner" style="margin: 0 auto; margin-bottom: 20px;"></div>
+            <p>Fetching Model Metrics...</p>
+        </div>
+
+    </main>
+
+    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+</body>
+</html>

@@ -40,7 +40,10 @@
                 </div>
                 <h1>Alzheimer’s Risk Predictor</h1>
                 <p class="subtitle">AI-powered medical analysis leveraging advanced Genetic and Clinical pipelines.</p>
-                <button type="button" id="start-btn" class="btn primary-btn glow-effect">Start Assessment <span class="arrow">→</span></button>
+                <div style="display: flex; gap: 15px; justify-content: center; width: 100%; flex-wrap: wrap;">
+                    <button type="button" id="start-btn" class="btn primary-btn glow-effect" style="flex: 1; min-width: 200px;">Start Assessment <span class="arrow">→</span></button>
+                    <a href="{{ url_for('dashboard') }}" class="btn secondary-btn glow-effect" style="flex: 1; min-width: 200px; text-decoration: none;">View Dashboard 📊</a>
+                </div>
             </div>
         </section>
 
