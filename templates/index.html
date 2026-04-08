@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alzheimer's Risk Predictor</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Load from current dir if running without Flask -->
+    <!-- <link rel="stylesheet" href="static/style.css"> -->
+</head>
+<body>
+
+    <!-- Ambient Neural Background -->
+    <div class="ambient-background"></div>
+
+    <main class="app-container">
+
+        <!-- 1. LANDING PAGE -->
+        <section id="landing-page" class="card glass view active">
+            <div class="card-content centered">
+                <div class="icon-brain">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="url(#gradient)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <defs>
+                            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#4fd1c5" />
+                                <stop offset="100%" stop-color="#805ad5" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M12 4.5c-3 -2.5-7.5 -2.5-9 2c-1.5 4.5 -1.5 7.5 .5 10c2 2.5 5 2.5 8.5 2.5s6.5 0 8.5-2.5c2-2.5 2-5.5 .5-10c-1.5-4.5-6-4.5-9-2z"/>
+                        <path d="M12 4.5v14.5"/>
+                        <path d="M8 8c1 0 2 .5 2 2"/>
+                        <path d="M16 8c-1 0-2 .5-2 2"/>
+                        <path d="M7 13c1 0 2-.5 2-2"/>
+                        <path d="M17 13c-1 0-2-.5-2-2"/>
+                        <path d="M9 17c1.5 0 3-.5 3-2"/>
+                        <path d="M15 17c-1.5 0-3-.5-3-2"/>
+                    </svg>
+                </div>
+                <h1>Alzheimer’s Risk Predictor</h1>
+                <p class="subtitle">AI-powered medical analysis leveraging advanced Genetic and Clinical pipelines.</p>
+                <button type="button" id="start-btn" class="btn primary-btn glow-effect">Start Assessment <span class="arrow">→</span></button>
+            </div>
+        </section>
+
+        <!-- 2. PREDICTION FORM PAGE -->
+        <section id="prediction-page" class="card glass view hidden">
+            <div class="card-content">
+                <h2>Clinical Assessment</h2>
+                <p class="desc">Please enter the patient's metrics for prediction.</p>
+                
+                <form id="prediction-form">
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label for="age">Age</label>
+                            <input type="number" id="age" name="Age" min="0" max="120" required placeholder="e.g. 68">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="bmi">BMI</label>
+                            <input type="number" id="bmi" name="BMI" step="0.1" min="10" max="60" required placeholder="e.g. 24.5">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="bp">Blood Pressure (Systolic)</label>
+                            <input type="number" id="bp" name="BloodPressure" min="70" max="250" required placeholder="e.g. 120">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="cholesterol">Cholesterol (Total)</label>
+                            <input type="number" id="cholesterol" name="Cholesterol" min="100" max="400" required placeholder="e.g. 180">
+                        </div>
+
+                        <div class="input-group">
+                            <label for="memory">Memory Complaints?</label>
+                            <div class="custom-select">
+                                <select id="memory" name="MemoryComplaints" required>
+                                    <option value="" disabled selected>Select option</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="confusion">Frequent Confusion?</label>
+                            <div class="custom-select">
+                                <select id="confusion" name="Confusion" required>
+                                    <option value="" disabled selected>Select option</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="input-group full-width">
+                            <label for="forget">Forgetfulness Issues?</label>
+                            <div class="custom-select">
+                                <select id="forget" name="Forgetfulness" required>
+                                    <option value="" disabled selected>Select option</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" id="back-btn" class="btn secondary-btn">Back</button>
+                        <button type="submit" id="predict-btn" class="btn primary-btn glow-effect">Analyze Data</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Loading Overlay -->
+            <div id="loading-overlay" class="hidden">
+                <div class="spinner"></div>
+                <p>Machine Learning Models Analyzing...</p>
+            </div>
+        </section>
+
+        <!-- 3. RESULT DISPLAY PAGE -->
+        <section id="result-page" class="card glass view hidden">
+            <div class="card-content centered">
+                <h2>Prediction Complete</h2>
+                <div class="result-circle-wrapper">
+                    <!-- Dynamic SVG Circle will be inserted / updated here -->
+                    <div id="risk-badge" class="risk-badge">
+                        <span id="risk-text">-- Risk</span>
+                    </div>
+                </div>
+                
+                <h3 id="confidence-percentage" class="confidence">--% Confidence</h3>
+                <p id="health-tip" class="health-tip">Analysis completed successfully.</p>
+                
+                <div class="form-actions result-actions">
+                    <button type="button" id="reset-btn" class="btn secondary-btn">New Prediction</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Connect local JavaScript -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <!-- <script src="static/script.js"></script> -->
+
+</body>
+</html>

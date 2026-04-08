@@ -1,0 +1,22 @@
+# Python Virtual Environments
+ml_env/
+myenv/
+venv/
+env/
+.env
+
+# Python Compilation Files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Data and Models
+*.csv
+*.pkl
+
+# OS and IDE Files
+.vscode/
+.idea/
+.DS_Store
+*.db
+*.sqlite3
