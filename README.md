@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Alzheimer's Risk Predictor
 
 A modern healthcare web application that uses a trained Random Forest machine learning model to predict the risk of Alzheimer's disease based on patient health metrics. The frontend features a sleek, glassmorphism-styled UI where users can input data and receive real-time risk assessments with confidence scores.
@@ -42,3 +43,7 @@ python app.py
 
 ### 4. Viewing the Application
 Open a web browser and navigate to `http://localhost:5000/`. You can now input health metrics such as Age, BMI, Systolic BP, Total Cholesterol, and subjective memory/confusion complaints to receive an instant risk assessment.
+=======
+# GENETIC_ML
+AI-powered Alzheimer’s risk predictor using ML models with full evaluation metrics, Flask backend, and interactive frontend for real-time medical risk prediction.
+>>>>>>> a665c9ef102260c35a0f1cb59e1372d6673b566e
