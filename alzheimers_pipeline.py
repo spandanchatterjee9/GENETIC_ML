@@ -15,6 +15,7 @@ from sklearn.metrics import (
     accuracy_score, precision_score, recall_score, f1_score,
     roc_auc_score, confusion_matrix, roc_curve, precision_recall_curve
 )
+from sklearn.feature_selection import SelectKBest, f_classif
 
 # Create output folder structure
 directories = [
@@ -56,17 +57,71 @@ def main():
     df = df.drop(columns=[col for col in ['PatientID', 'DoctorInCharge'] if col in df.columns])
 
     # Features
-    feature_cols = [
-        'Age', 'BMI', 'SystolicBP', 'CholesterolTotal',
-        'MemoryComplaints', 'Confusion', 'Forgetfulness'
-    ]
+    numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
+    if 'Diagnosis' in numeric_cols:
+        numeric_cols.remove('Diagnosis')
 
-    X = df[feature_cols]
+    X = df[numeric_cols]
     y = df['Diagnosis']
 
     # Handle missing values
     imputer = SimpleImputer(strategy='mean')
     X = pd.DataFrame(imputer.fit_transform(X), columns=X.columns)
+
+    print("\n🔹 Performing Feature Selection...")
+
+    # ------------------------
+    # METHOD 1: Random Forest Feature Importance
+    # ------------------------
+    rf_selector = RandomForestClassifier(random_state=42)
+    rf_selector.fit(X, y)
+    importances = rf_selector.feature_importances_
+    
+    top_n = 5
+    rf_indices = np.argsort(importances)[::-1][:top_n]
+    rf_features = [X.columns[i] for i in rf_indices]
+
+    # ------------------------
+    # METHOD 2: SelectKBest (Statistical Method)
+    # ------------------------
+    selector = SelectKBest(score_func=f_classif, k=5)
+    X_new = selector.fit_transform(X, y)
+    
+    kbest_indices = selector.get_support(indices=True)
+    kbest_features = [X.columns[i] for i in kbest_indices]
+
+    # Combine unique selected features
+    selected_features = list(set(rf_features + kbest_features))
+    print("Selected Features:", selected_features)
+
+    with open("outputs/selected_features.txt", "w") as f:
+        f.write("Selected Features:\n")
+        for item in selected_features:
+            f.write(f"- {item}\n")
+    print("Saved: outputs/selected_features.txt")
+
+    # VISUALIZATION
+    plt.figure(figsize=(12, 6))
+    
+    all_indices = np.argsort(importances)[::-1]
+    sorted_importances = importances[all_indices]
+    sorted_features = [X.columns[i] for i in all_indices]
+    
+    colors = ['orange' if feat in selected_features else 'skyblue' for feat in sorted_features]
+    
+    plt.bar(range(len(sorted_features)), sorted_importances, color=colors)
+    plt.xticks(range(len(sorted_features)), sorted_features, rotation=90)
+    plt.xlabel("Features")
+    plt.ylabel("Importance Score")
+    plt.title("Feature Selection (Random Forest Importances)")
+    plt.tight_layout()
+    fs_filepath = "outputs/feature_importance/feature_selection.png"
+    plt.savefig(fs_filepath)
+    print("Saved:", fs_filepath)
+    plt.close()
+
+    # Use selected features instead of full feature set
+    X = X[selected_features]
 
     # Train-test split (FIXED)
     X_train, X_test, y_train, y_test = train_test_split(
