@@ -17,14 +17,21 @@ from sklearn.metrics import (
 )
 from sklearn.feature_selection import SelectKBest, f_classif
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", "..", ".."))
+
+DATA_DIR = os.path.join(PROJECT_ROOT, "data")
+OUTPUTS_DIR = os.path.join(PROJECT_ROOT, "outputs")
+MODELS_DIR = os.path.join(PROJECT_ROOT, "models")
+
 # Create output folder structure
 directories = [
-    "outputs",
-    "outputs/confusion_matrices",
-    "outputs/roc_curves",
-    "outputs/precision_recall",
-    "outputs/feature_importance",
-    "outputs/metrics"
+    OUTPUTS_DIR,
+    os.path.join(OUTPUTS_DIR, "confusion_matrices"),
+    os.path.join(OUTPUTS_DIR, "roc_curves"),
+    os.path.join(OUTPUTS_DIR, "precision_recall"),
+    os.path.join(OUTPUTS_DIR, "feature_importance"),
+    os.path.join(OUTPUTS_DIR, "metrics")
 ]
 for d in directories:
     os.makedirs(d, exist_ok=True)
@@ -50,7 +57,7 @@ def main():
     print("🔹 Starting Alzheimer's ML Pipeline...")
 
     # Load dataset
-    df = pd.read_csv("alzheimers_disease_data.csv")
+    df = pd.read_csv(os.path.join(DATA_DIR, "alzheimers_disease_data.csv"))
     print("✅ Data Loaded:", df.shape)
 
     # Drop irrelevant columns
@@ -94,11 +101,12 @@ def main():
     selected_features = list(set(rf_features + kbest_features))
     print("Selected Features:", selected_features)
 
-    with open("outputs/selected_features.txt", "w") as f:
+    selected_features_path = os.path.join(OUTPUTS_DIR, "selected_features.txt")
+    with open(selected_features_path, "w") as f:
         f.write("Selected Features:\n")
         for item in selected_features:
             f.write(f"- {item}\n")
-    print("Saved: outputs/selected_features.txt")
+    print("Saved:", selected_features_path)
 
     # VISUALIZATION
     plt.figure(figsize=(12, 6))
@@ -115,7 +123,7 @@ def main():
     plt.ylabel("Importance Score")
     plt.title("Feature Selection (Random Forest Importances)")
     plt.tight_layout()
-    fs_filepath = "outputs/feature_importance/feature_selection.png"
+    fs_filepath = os.path.join(OUTPUTS_DIR, "feature_importance", "feature_selection.png")
     plt.savefig(fs_filepath)
     print("Saved:", fs_filepath)
     plt.close()
@@ -191,7 +199,7 @@ def main():
     print("\n📊 MODEL COMPARISON:\n")
     print(results_df)
 
-    metrics_csv_path = "outputs/metrics/model_metrics.csv"
+    metrics_csv_path = os.path.join(OUTPUTS_DIR, "metrics", "model_metrics.csv")
     results_df.to_csv(metrics_csv_path)
     print("Saved:", metrics_csv_path)
 
@@ -206,7 +214,7 @@ def main():
         fig = plt.figure()
         ax = fig.add_subplot(111)
         plot_confusion_matrix(curves[name]['cm'], ax, f"{name}")
-        filepath = f"outputs/confusion_matrices/{clean_name}.png"
+        filepath = os.path.join(OUTPUTS_DIR, "confusion_matrices", f"{clean_name}.png")
         plt.savefig(filepath)
         print("Saved:", filepath)
         plt.close()
@@ -223,7 +231,7 @@ def main():
         plt.ylabel("True Positive Rate")
         plt.title(f"ROC Curve - {name}")
         plt.legend()
-        filepath = f"outputs/roc_curves/roc_{clean_name}.png"
+        filepath = os.path.join(OUTPUTS_DIR, "roc_curves", f"roc_{clean_name}.png")
         plt.savefig(filepath)
         print("Saved:", filepath)
         plt.close()
@@ -240,7 +248,7 @@ def main():
     plt.ylabel("True Positive Rate")
     plt.title("Combined ROC Curve")
     plt.legend()
-    filepath = "outputs/roc_curves/combined_roc.png"
+    filepath = os.path.join(OUTPUTS_DIR, "roc_curves", "combined_roc.png")
     plt.savefig(filepath)
     print("Saved:", filepath)
     plt.close()
@@ -256,7 +264,7 @@ def main():
     plt.ylabel("Precision")
     plt.title("Precision-Recall Curve")
     plt.legend()
-    filepath = "outputs/precision_recall/precision_recall.png"
+    filepath = os.path.join(OUTPUTS_DIR, "precision_recall", "precision_recall.png")
     plt.savefig(filepath)
     print("Saved:", filepath)
     plt.close()
@@ -271,7 +279,7 @@ def main():
         'F1 Score': 'f1_score.png'
     }
     for metric, filename in metrics_mapping.items():
-        filepath = f"outputs/metrics/{filename}"
+        filepath = os.path.join(OUTPUTS_DIR, "metrics", filename)
         plt.figure()
         plt.bar(results_df.index, results_df[metric], color=['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728'])
         plt.xlabel("Models")
@@ -296,7 +304,7 @@ def main():
     plt.xlabel("Relative Importance")
     plt.title("Feature Importance (Random Forest)")
     plt.tight_layout()
-    filepath = "outputs/feature_importance/feature_importance.png"
+    filepath = os.path.join(OUTPUTS_DIR, "feature_importance", "feature_importance.png")
     plt.savefig(filepath)
     print("Saved:", filepath)
     plt.close()
@@ -304,18 +312,18 @@ def main():
     # ========================
     # SAVE MODEL
     # ========================
-    model_path = "outputs/rf_alzheimers_model.pkl"
-    scaler_path = "outputs/scaler.pkl"
+    model_path = os.path.join(OUTPUTS_DIR, "rf_alzheimers_model.pkl")
+    scaler_path = os.path.join(OUTPUTS_DIR, "scaler.pkl")
     pickle.dump(rf, open(model_path, "wb"))
     pickle.dump(scaler, open(scaler_path, "wb"))
     print("Saved:", model_path)
     print("Saved:", scaler_path)
 
-    print("\n✅ All outputs saved in /outputs folder")
+    print("\n✅ All outputs saved in outputs folder")
     print("Files created:")
-    for root, dirs, files in os.walk("outputs"):
+    for root, dirs, files in os.walk(OUTPUTS_DIR):
         for file in files:
-            print(os.path.join(root, file))
+            print(os.path.relpath(os.path.join(root, file), PROJECT_ROOT))
     print("🎯 DONE")
 
 

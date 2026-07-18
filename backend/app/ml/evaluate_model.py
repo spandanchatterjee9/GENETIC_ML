@@ -7,9 +7,15 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", "..", ".."))
+DATA_PATH = os.path.join(PROJECT_ROOT, "data", "alzheimers_disease_data.csv")
+
 def compute_metrics():
     print("--- 1. Dataset Details ---")
-    df = pd.read_csv("alzheimers_disease_data.csv")
+    df = pd.read_csv(DATA_PATH)
     print(f"Total number of rows (records): {df.shape[0]}")
     
     # Drop irrelevant columns
