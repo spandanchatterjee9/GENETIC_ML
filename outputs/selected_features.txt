@@ -1,6 +1,6 @@
 Selected Features:
-- MemoryComplaints
 - FunctionalAssessment
-- MMSE
+- MemoryComplaints
 - BehavioralProblems
+- MMSE
 - ADL
