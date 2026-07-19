@@ -133,21 +133,44 @@ networks:
 
 ---
 
-## 5. CPU Optimization and Threading in ML Containers
+## 5. Container Resource Allocation: CPU vs. RAM (Memory Usage)
 
-When containerizing Python-based Machine Learning models (such as scikit-learn, numpy, or pandas), it is common to notice high CPU spikes (often exceeding 400% or pinning the host CPU) during startup or prediction.
+When running containerized applications, Docker Desktop monitors two distinct host hardware resources: **CPU Usage** and **Container Memory Usage (RAM)**. Understanding these metrics is vital for debugging resource allocation differences between projects.
 
-### Why does this happen?
-1. **Concurrency and Multiple Workers**: Uvicorn runs multiple worker processes (e.g., `--workers 4`) to handle concurrent requests. When the container starts, all workers boot simultaneously.
-2. **Library Ingestion Overhead**: Heavy mathematical libraries like `scikit-learn`, `scipy`, and `numpy` load underlying C/C++ libraries (such as OpenBLAS, MKL, or OpenMP) on import.
-3. **Implicit Multithreading**: By default, libraries like NumPy detect all CPU cores of the host machine and spawn matching worker threads. If your host has 16 logical cores and you run 4 Uvicorn workers, you get up to $4 \times 16 = 64$ threads running concurrently in a single container. This causes high CPU scheduling overhead and context-switching thrashing, spiking the CPU load.
+### A. Core Differences: CPU vs. RAM in Containers
 
-### How to optimize CPU usage:
-1. **Restrict Numeric Thread Pools**: Force underlying mathematical libraries to run single-threaded per worker process by setting system environment variables:
-   - `OMP_NUM_THREADS=1` (OpenMP)
-   - `MKL_NUM_THREADS=1` (Math Kernel Library)
-   - `OPENBLAS_NUM_THREADS=1` (OpenBLAS)
-   - `VECLIB_MAXIMUM_THREADS=1` (Vector Library)
-   - `NUMEXPR_NUM_THREADS=1` (NumExpr)
-2. **Reduce Uvicorn Workers**: Set Uvicorn to run with 2 workers instead of 4. Since FastAPI is asynchronous, 2 workers are more than sufficient to handle high concurrency while cutting memory and boot CPU footprints in half.
+1. **CPU Usage (Processor)**:
+   - **What it is**: The percentage of processor cycles consumed by active threads *at any given moment*. 
+   - **Characteristics**: CPU usage is highly dynamic. It spikes during server startups, code compilation, and model predictions, but drops to near 0% when the server is idle.
+2. **Memory Usage (RAM)**:
+   - **What it is**: The volume of random-access memory (RAM) allocated and held by the running processes *across all containers in the stack*.
+   - **Characteristics**: RAM usage is persistent and static. Once the application loads its libraries, imports dependencies, and reads model files into memory, it retains that RAM allocation to handle requests. It remains high even when the server is idle.
 
+---
+
+### B. Analyzing the Memory Footprint: `genetic_ml` (~800MB) vs. `mcube-sizing-estimator` (~190MB)
+
+You will notice that the `genetic_ml` container stack consumes around **793 MB** of RAM on start, whereas the `mcube-sizing-estimator` stack uses only **189 MB** of RAM. This significant difference is caused by the following architectural factors:
+
+#### 1. Machine Learning Framework Imports (The Library Footprint)
+- **`genetic_ml`**: To run standard scaling preprocessing and Random Forest prediction logic, the python backend must import heavy scientific frameworks: `scikit-learn`, `pandas`, `scipy`, and `numpy`. Loading these libraries into a Python virtual machine instantly consumes about **150MB–200MB** of RAM per process due to compiled C-extensions.
+- **`mcube-sizing-estimator`**: If an application performs calculations using raw Python math modules, custom rules, or a lightweight parser instead of importing the entire `scikit-learn` stack, its basic library load footprint is minimal (typically under **30MB** of RAM).
+
+#### 2. Model Deserialization (In-Memory Pickles)
+- **`genetic_ml`**: At startup, the backend deserializes `rf_alzheimers_model.pkl` (a Random Forest containing multiple decision trees with split nodes) and `scaler.pkl`. These serialized objects must reside fully in RAM to serve predictions at sub-millisecond latencies.
+- **`mcube-sizing-estimator`**: Does not load a heavy scikit-learn ensemble pickle, keeping in-memory object allocations small.
+
+#### 3. Worker Process Multiplication (Process-Level Isolation)
+Uvicorn runs multiple worker processes (e.g. `--workers 2` or `4`) to support concurrency. Because Python uses process-level isolation for workers:
+- **Each worker process spawns a separate memory space**.
+- Each process independently imports Python interpreter packages (`scikit-learn`, `pandas`, `numpy`) and loads its own copy of the serialized Random Forest model into RAM.
+- If one worker process requires **250MB** of RAM, running 2 workers uses **500MB** of RAM, and running 4 workers uses **1.0GB** of RAM.
+
+#### 4. Stack Composition (Total Service Count)
+Docker Desktop displays the **total aggregated RAM usage** of all services declared in your `docker-compose.yml`:
+- **`mcube-sizing-estimator`**: Runs a single container (FastAPI backend + lightweight SQLite file database).
+- **`genetic_ml`**: Runs a full multi-container stack:
+  1. `genetic-ml-backend` (FastAPI + SciPy/SKLearn + Model + 2 Workers) $\approx 500\text{MB}$
+  2. `genetic-ml-db` (MariaDB SQL container allocating internal buffer pools and connection caches) $\approx 150\text{MB}$
+  3. `genetic-ml-frontend` (Nginx proxy container serving HTML/static assets) $\approx 15\text{MB}$
+  - **Combined Stack Memory**: $\approx 793\text{MB}$
