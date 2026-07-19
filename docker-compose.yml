@@ -1,13 +1,56 @@
 version: '3.8'
 
 services:
-  alzheimers-app:
+  mariadb:
+    image: "mariadb:10.6"
+    container_name: genetic-ml-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_USER=maria
+      - MYSQL_PASSWORD=maria
+      - MYSQL_DATABASE=genetic_ml
+    restart: always
+    ports:
+      - "3306:3306"
+    volumes:
+      - maria_data:/var/lib/mysql
+    networks:
+      - genetic-ml-net
+
+  backend:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    container_name: alzheimers-fastapi
-    environment:
-      - PORT=5000
+    container_name: genetic-ml-backend
+    restart: always
     ports:
-      - "5000:5000"
-    restart: unless-stopped
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - DATABASE_URL=mysql+pymysql://maria:maria@mariadb:3306/genetic_ml
+    depends_on:
+      - mariadb
+    networks:
+      - genetic-ml-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: genetic-ml-frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - genetic-ml-net
+
+volumes:
+  maria_data:
+    name: genetic_maria_data
+
+networks:
+  genetic-ml-net:
+    driver: bridge
+    name: genetic-ml-net

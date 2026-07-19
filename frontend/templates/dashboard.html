@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ML Analytics Dashboard | Alzheimer's Predictor</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/dashboard.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -18,7 +18,7 @@
             <span class="brain-icon">🧠</span> Alzheimer's Predictor
         </div>
         <div class="nav-links">
-            <a href="{{ url_for('home') }}" class="btn secondary-btn nav-btn" style="text-decoration: none;">← Back to Prediction</a>
+            <a href="/index.html" class="btn secondary-btn nav-btn" style="text-decoration: none;">← Back to Prediction</a>
         </div>
     </nav>
 
@@ -79,6 +79,6 @@
 
     </main>
 
-    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+    <script src="/static/dashboard.js"></script>
 </body>
 </html>

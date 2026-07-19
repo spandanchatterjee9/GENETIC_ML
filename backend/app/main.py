@@ -24,6 +24,14 @@ static_dir = os.path.join(PROJECT_ROOT, "frontend", "static")
 # Lifespan context manager for loading ML assets once on startup
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    logger.info("Initializing database tables...")
+    try:
+        from backend.app.models.database import Base, engine
+        Base.metadata.create_all(bind=engine)
+        logger.info("Database tables initialized successfully.")
+    except Exception as e:
+        logger.error("Failed to initialize database tables: %s", str(e))
+
     logger.info("Initializing ML models and preprocessors...")
     try:
         prediction_service.initialize()
@@ -64,10 +72,12 @@ templates.env.globals["url_for"] = jinja2_url_for
 
 # HTML template serving endpoints (matching Flask routes exactly)
 @app.get("/", response_class=HTMLResponse)
+@app.get("/index.html", response_class=HTMLResponse)
 def home(request: Request):
     return templates.TemplateResponse(request, "index.html")
 
 @app.get("/dashboard", response_class=HTMLResponse)
+@app.get("/dashboard.html", response_class=HTMLResponse)
 def dashboard(request: Request):
     return templates.TemplateResponse(request, "dashboard.html")
 

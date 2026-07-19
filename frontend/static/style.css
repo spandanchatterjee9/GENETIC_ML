@@ -363,3 +363,147 @@ h2 {
         font-size: 1.8rem;
     }
 }
+
+/* Auth Header, Modals, and History log styles */
+.app-header {
+    width: 100%;
+    margin-bottom: 20px;
+    padding: 12px 25px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    box-shadow: var(--glass-shadow);
+}
+
+.user-profile {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.95rem;
+}
+
+#user-status-text {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.small-btn {
+    padding: 5px 12px;
+    font-size: 0.85rem;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.85);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(8px);
+}
+
+.modal-card {
+    width: 100%;
+    max-width: 400px;
+    padding: 30px !important;
+}
+
+.modal-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--glass-border);
+}
+
+.tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    padding: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.tab-btn.active {
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.error-msg {
+    color: var(--danger-color);
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.history-section {
+    width: 100%;
+    margin-top: 30px;
+    border-top: 1px solid var(--glass-border);
+    padding-top: 20px;
+}
+
+.history-section h3 {
+    margin-bottom: 15px;
+    color: var(--primary-color);
+}
+
+.table-container {
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    text-align: left;
+}
+
+.history-table th, .history-table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.history-table th {
+    background: rgba(255, 255, 255, 0.03);
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.history-table td {
+    color: var(--text-muted);
+}
+
+.history-badge {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.history-badge.high-risk {
+    background: rgba(245, 101, 101, 0.15);
+    color: var(--danger-color);
+}
+
+.history-badge.low-risk {
+    background: rgba(72, 187, 120, 0.15);
+    color: var(--success-color);
+}
+
+.hidden {
+    display: none !important;
+}
+
