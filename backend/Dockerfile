@@ -24,5 +24,5 @@ COPY . .
 # Expose the port the app runs on
 EXPOSE 5000
 
-# Run the application using Uvicorn for production
-CMD ["sh", "-c", "uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT} --workers 4"]
+# Run the application using Uvicorn for production (2 workers limit context switching CPU spikes)
+CMD ["sh", "-c", "uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT} --workers 2"]

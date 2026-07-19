@@ -28,6 +28,11 @@ services:
     environment:
       - PORT=8000
       - DATABASE_URL=mysql+pymysql://maria:maria@mariadb:3306/genetic_ml
+      - OMP_NUM_THREADS=1
+      - MKL_NUM_THREADS=1
+      - OPENBLAS_NUM_THREADS=1
+      - VECLIB_MAXIMUM_THREADS=1
+      - NUMEXPR_NUM_THREADS=1
     depends_on:
       - mariadb
     networks:

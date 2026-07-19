@@ -130,3 +130,24 @@ networks:
         name: mcube-sizing-net
 ```
 - **`driver: bridge`**: The default networking mode. Docker creates an isolated virtual local network interface card (NIC) on your host. Only containers attached to this virtual network can communicate with one another, shielding them from external network scans while allowing seamless inter-service discovery.
+
+---
+
+## 5. CPU Optimization and Threading in ML Containers
+
+When containerizing Python-based Machine Learning models (such as scikit-learn, numpy, or pandas), it is common to notice high CPU spikes (often exceeding 400% or pinning the host CPU) during startup or prediction.
+
+### Why does this happen?
+1. **Concurrency and Multiple Workers**: Uvicorn runs multiple worker processes (e.g., `--workers 4`) to handle concurrent requests. When the container starts, all workers boot simultaneously.
+2. **Library Ingestion Overhead**: Heavy mathematical libraries like `scikit-learn`, `scipy`, and `numpy` load underlying C/C++ libraries (such as OpenBLAS, MKL, or OpenMP) on import.
+3. **Implicit Multithreading**: By default, libraries like NumPy detect all CPU cores of the host machine and spawn matching worker threads. If your host has 16 logical cores and you run 4 Uvicorn workers, you get up to $4 \times 16 = 64$ threads running concurrently in a single container. This causes high CPU scheduling overhead and context-switching thrashing, spiking the CPU load.
+
+### How to optimize CPU usage:
+1. **Restrict Numeric Thread Pools**: Force underlying mathematical libraries to run single-threaded per worker process by setting system environment variables:
+   - `OMP_NUM_THREADS=1` (OpenMP)
+   - `MKL_NUM_THREADS=1` (Math Kernel Library)
+   - `OPENBLAS_NUM_THREADS=1` (OpenBLAS)
+   - `VECLIB_MAXIMUM_THREADS=1` (Vector Library)
+   - `NUMEXPR_NUM_THREADS=1` (NumExpr)
+2. **Reduce Uvicorn Workers**: Set Uvicorn to run with 2 workers instead of 4. Since FastAPI is asynchronous, 2 workers are more than sufficient to handle high concurrency while cutting memory and boot CPU footprints in half.
+
